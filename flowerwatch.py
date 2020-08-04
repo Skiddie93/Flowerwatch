@@ -4,6 +4,7 @@ import pickle
 import curses
 import time
 
+mn = 1
 a = ""
 class plant:
   def __init__(self, name, watered):
@@ -45,18 +46,19 @@ def menu(win, current_row):
             win.addstr(y, x, ime)
     win.refresh()
 
-def menubottom(win, current_row, current_column):
+def menubottom(win, current_row, current_column, mn):
+    global usedlen
 
-
-    mod1 = ["Add", "Else"]
+    mod1 = ["Add"]
+    mod2 = ["Water", "Delete", "Back"]
     h, w = win.getmaxyx()
-    mode = False;
-    if mode == False:
+    if mn == 1:
+        usedlen= len(mod1)
+        win.clear()
+        menu(win, current_row)
         for ind, opt in enumerate(mod1):
-            y = h-1
-            x = w//9
-            if ind==1:
-                x=w//2
+            y = h-2
+            x = w//3//2-len(mod1)+1
             if current_row == len(allplants) and current_column==ind:
 
                 win.attron(curses.color_pair(1) | curses.A_BOLD)
@@ -65,17 +67,42 @@ def menubottom(win, current_row, current_column):
                 win.attroff(curses.color_pair(1))
             else:
                 win.addstr(y, x, opt)
+
+    elif mn == 2:
+
+        usedlen=len(mod2)
+        win.clear()
+        menu(win, current_row)
+        for ind, opt in enumerate(mod2):
+            multi= ind+1
+            y = h-2
+            t = w//3
+            x = (t*multi)-t//2-len(mod2)
+
+            if current_row == len(allplants) and current_column==ind:
+
+                win.attron(curses.color_pair(1) | curses.A_BOLD)
+                win.addstr(y, x, opt)
+
+                win.attroff(curses.color_pair(1))
+                menu(win, current_row)
+            else:
+
+
+                win.addstr(y, x, opt)
+                menu(win, current_row)
+
     win.refresh()
+    return usedlen
 
-
-def usrinput(win,):
+def usrinput(win):
     win.clear()
 
     record = ''
     current_row = len(allplants)
     current_column = 0
     h, w = win.getmaxyx()
-    y = h-1
+    y = h-2
     x = w//2-11
     win.attron(curses.color_pair(2) | curses.A_BOLD)
     win.addstr(y, x, "Plant Name: ")
@@ -93,7 +120,7 @@ def usrinput(win,):
                 allplants.append(plant(record, "Null"))
             win.clear()
             menu(win, current_row)
-            menubottom(win, current_row, current_column)
+            menubottom(win, current_row, current_column, mn)
             win.refresh()
             break
         elif ord(key) == 127:
@@ -112,13 +139,16 @@ def main(win):
     curses.use_default_colors()
     curses.init_pair(4, curses.COLOR_GREEN, -1)
     win.bkgd(' ', curses.color_pair(4) | curses.A_BOLD)
-    curses.init_pair(1, curses.COLOR_BLACK, curses.COLOR_WHITE )
+    curses.init_pair(1, curses.COLOR_BLACK, curses.COLOR_GREEN )
     curses.init_pair(2, curses.COLOR_BLACK, curses.COLOR_GREEN )
     curses.curs_set(0)
     current_row = 0
     current_column = 0
+    mn = 1
 
-    menubottom(win, current_row, current_column)
+
+
+    menubottom(win, current_row, current_column, mn)
     menu(win, current_row)
 
     while True:
@@ -129,19 +159,22 @@ def main(win):
         elif key == curses.KEY_DOWN and current_row < len(allplants):
             current_row += 1
 
-        elif key == curses.KEY_RIGHT and current_row == len(allplants) and current_column<1:
+        elif key == curses.KEY_RIGHT and current_row == len(allplants) and current_column<usedlen-1:
             current_column += 1
 
         elif key == curses.KEY_LEFT and current_row == len(allplants) and current_column>0:
             current_column -= 1
 
-        elif key == curses.KEY_ENTER or key in [10,13] and current_row == len(allplants) and current_column == 0:
+        elif key == curses.KEY_ENTER or key in [10,13] and current_row == len(allplants) and current_column == 0 and mn==1:
             usrinput(win)
 
+        elif key == curses.KEY_ENTER or key in [10,13] and current_row < 4:
+            mn = 2
+            menubottom(win, current_row, current_column, mn)
 
 
         menu(win, current_row)
-        menubottom(win, current_row, current_column)
+        menubottom(win, current_row, current_column, mn)
 
 curses.wrapper(main)
 
