@@ -111,7 +111,7 @@ def menubottom(win, current_row, current_column, mn):
 
 def usrinput(win):
     win.clear()
-
+    tittle(win)
     record = ''
     current_row = len(allplants)
     current_column = 0
@@ -136,12 +136,14 @@ def usrinput(win):
             win.clear()
             menu(win, current_row)
             menubottom(win, current_row, current_column, mn)
+
             win.refresh()
             break
         elif ord(key) == 127:
             record = record[:-1]
             win.clear()
             menu(win, current_row)
+            tittle(win)
             win.attron(curses.color_pair(2) | curses.A_BOLD)
             win.addstr(y, x, "Plant Name: "+record)
             win.attroff(curses.color_pair(2))
@@ -150,6 +152,15 @@ def usrinput(win):
             record += str(key)
             win.addstr(y, x, "Plant Name: "+record)
             win.attroff(curses.color_pair(2))
+
+def tittle(win):
+    h, w = win.getmaxyx()
+    y = 1
+    x = w//2-5
+
+    win.addstr(y, x, "Flowerwatch")
+    win.refresh()
+
 def main(win):
     curses.use_default_colors()
     curses.init_pair(4, curses.COLOR_GREEN, -1)
@@ -167,6 +178,7 @@ def main(win):
 
     menubottom(win, current_row, current_column, mn)
     menu(win, current_row)
+    tittle(win)
 
     while True:
         key = win.getch()
@@ -185,6 +197,7 @@ def main(win):
         elif key == curses.KEY_ENTER or key in [10,13] and current_row == len(allplants) and current_column == 0 and mn==1:
             usrinput(win)
 
+
         elif key == curses.KEY_ENTER or key in [10,13] and current_row == len(allplants) and current_column == 2 and mn==2:
             mn=1
             current_row = prev_row
@@ -199,6 +212,7 @@ def main(win):
 
         elif key == curses.KEY_ENTER or key in [10,13] and current_row == len(allplants) and current_column == 0 and mn==2:
             allplants[prev_row].watered=date.today()
+            pickle.dump(allplants, open("plants.pkl", "wb"))
 
             mn=1
             current_row = prev_row
@@ -223,7 +237,7 @@ def main(win):
 
         menu(win, current_row)
         menubottom(win, current_row, current_column, mn)
-
+        tittle(win)
 curses.wrapper(main)
 
 
