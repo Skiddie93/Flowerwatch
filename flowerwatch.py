@@ -225,7 +225,8 @@ def main(win):
             menubottom(win, current_row, current_column, mn)
             current_row = len(allplants)
 
-
+        elif key == ord('q'):
+            break
 
         if mn== 2 and key == curses.KEY_UP:
             current_row += 1
